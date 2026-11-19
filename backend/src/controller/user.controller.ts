@@ -84,7 +84,7 @@ export async function userLogin(request: Request, response: Response): Promise<R
         }
 
         const token = createToken(user)
-        response.cookie("user_Authentication_token", token);
+        createSession(response, 'user_Authentication_token', token) //set the token in cookies for session
 
         user.isActive = user.isVarified = true; //chained assignment
         await user.save();
@@ -104,13 +104,6 @@ export async function logoutUser(request: Request, response: Response) {
 
     try {
         /*error handling*/
-        const deleteToken = response.removeHeader || response.clearCookie('user_Authentication_token') || null;
-        if (deleteToken == null) {
-            return response.status(400).json({
-                message: 'token is not deleted'
-            })
-        }
-
         const user = await userModel.findById(request.user?.id);
         if (user === null) {
             return response.status(400).json({
@@ -119,7 +112,7 @@ export async function logoutUser(request: Request, response: Response) {
         }
 
         /*execution*/
-        const clearsession = clearSession('user_Authentication_token')
+        const clearsession = clearSession(response, 'user_Authentication_token')
         if (!clearsession) {
             return response.send(400).json({ message: 'session is not cleared' })
         }
@@ -127,8 +120,7 @@ export async function logoutUser(request: Request, response: Response) {
         await user.save();
 
         return response.status(200).json({
-            message: 'user is logout successfully',
-            token: deleteToken
+            message: 'user is logout successfully'
         })
 
     } catch (error) {

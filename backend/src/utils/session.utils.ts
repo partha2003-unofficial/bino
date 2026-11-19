@@ -15,6 +15,6 @@ export function createSession(response: Response, cookieName: string, token: str
     })
 }
 
-export function clearSession(cookieName: string) {
+export function clearSession(response: Response, cookieName: string) {
     return response.clearCookie(cookieName, cookiesOption)
 }
