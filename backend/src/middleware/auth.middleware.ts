@@ -4,7 +4,7 @@ import { verifyToken } from "../services/tokenServices.ts";
 export async function authenticaitonUser(request: Request, response: Response, next: NextFunction) {
     try {
         const token = request.headers.authorization?.split(' ')[1] ||
-            request.headers?.cookie || null
+            request.cookies['user_Authentication_token']
 
         if (!token) {
             return response.status(404).json({

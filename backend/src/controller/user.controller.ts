@@ -4,6 +4,8 @@ import { loginValidation, userValidation } from '../validation/user.validation.t
 import userModel from '../model/user.model.ts'
 import { hashPassword, verifyHashPassword } from '../services/hashPassword.services.ts'
 import { createToken } from '../services/tokenServices'
+import { clearSession, createSession } from '../utils/session.utils.ts'
+import { sendRegistrationEmail } from '../lib/email.ts'
 
 export async function registerUser(request: Request, response: Response): Promise<Response> {
     try {
@@ -38,9 +40,17 @@ export async function registerUser(request: Request, response: Response): Promis
                 message: 'user is not created !'
             })
         }
+
+        //wellcome email
+        const sendEmail = await sendRegistrationEmail(user.email, user.fullName?.firstName as string)
+
+        const token = createToken(user)
+        createSession(response, 'user_Authentication_token', token) //set the token in cookies for session
+
         return response.status(200).json({
             message: 'user created successfully',
-            user: user
+            user: user,
+            email_Confermation: sendEmail
         })
     } catch (error) {
         return response.status(500).json({ message: 'internal sever error' })
@@ -109,6 +119,10 @@ export async function logoutUser(request: Request, response: Response) {
         }
 
         /*execution*/
+        const clearsession = clearSession('user_Authentication_token')
+        if (!clearsession) {
+            return response.send(400).json({ message: 'session is not cleared' })
+        }
         user.isActive = false;
         await user.save();
 
