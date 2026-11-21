@@ -1,4 +1,4 @@
-import { type Response, type CookieOptions, response } from 'express'
+import type { Response, CookieOptions } from 'express'
 import { env } from '../lib/env'
 
 const cookiesOption: CookieOptions = {
