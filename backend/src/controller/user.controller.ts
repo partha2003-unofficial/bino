@@ -74,7 +74,7 @@ export async function userLogin(request: Request, response: Response): Promise<R
         const compareHashPassword = await verifyHashPassword(user?.password, password);
         if (compareHashPassword == false) {
             return response.status(404).json({
-                message: 'password not hashed'
+                message: 'please enter correct password'
             })
         }
 
@@ -86,6 +86,7 @@ export async function userLogin(request: Request, response: Response): Promise<R
 
         return response.status(200).json({
             message: "user is validate",
+            user: user,
             token: token
         })
     } catch (error) {

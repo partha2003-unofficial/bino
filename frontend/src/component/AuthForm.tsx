@@ -14,7 +14,23 @@ export default function AuthForm({ mode }: AuthFormProps) {
     const [error, setError] = useState('')
     const location = useLocation()
 
-    const distination = location.state?.from ?? "/profile";
+    const destination = location.state?.from ?? "/profile";
+    /* 
+       what is the main usecase of useLocation: 
+       Imagine you are using your stock trading application.
+       You want to visit the /stocks page, but you haven't logged in yet.
+       Now the user is redirected to /login.
+
+       But there is a problem:
+
+       After successfully logging in, where should the application send the user?
+       - /profile?
+       - /stocks?
+       - /home?
+       We need to remember the original destination.
+
+       That's where useLocation() comes in. 
+    */
 
     async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         /*
@@ -31,17 +47,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
         try {
             const { data } = await api.post(isSignUp ? "/user/signup" : "/user/signin", body);
             setUser(data.user)
+
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Please try again');
             /*
               if the error is a instance of the Error(that is use to chack if the error is comming form the backend try catch block or not)
               then the set the error.message in the seError otherwise "please try again"
             */
+        } finally {
+            setLodding(false)
         }
     }
 
     if (checking) return <p className="text-zinc-400">Checking session...</p>
-    if (user) return <Navigate to={distination} replace />
+    if (user) return <Navigate to={destination} replace />
 
     return (
         <section className="panel mx-auto max-w-md">
