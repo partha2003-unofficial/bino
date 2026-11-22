@@ -1,8 +1,10 @@
+import { useAuthStore } from "@/store/useAuthStore";
+
 export default function Profile() {
-  const user = {
-    username: "Student",
-    email: "student@example.com",
-  };
+
+  const user = useAuthStore(state => state.user);
+
+  if(!user) return null;
 
   return (
     <section className="panel max-w-lg">
@@ -11,7 +13,7 @@ export default function Profile() {
       <dl className="mt-6 divide-y divide-zinc-800">
         <div className="profile-row">
           <dt>Username</dt>
-          <dd>{user.username}</dd>
+          <dd>{user.userName}</dd>
         </div>
 
         <div className="profile-row">

@@ -9,16 +9,15 @@ import { sendRegistrationEmail } from '../lib/email.ts'
 
 export async function registerUser(request: Request, response: Response): Promise<Response> {
     try {
-
-        const { data, success, error } = userValidation.safeParse(request.body)
-        if (error || !success) {
+        const { data, error } = userValidation.safeParse(request.body)
+        if (error) {
             return response.status(404).json({
                 message: 'data did not give properly',
                 error: z.flattenError(error)
             })
         }
 
-        const { fullName, email, password } = data
+        const { email, password } = data
 
         const isExstingUserPresent = await userModel.findOne({ email: email ?? null })
         if (isExstingUserPresent !== null) {
@@ -29,11 +28,7 @@ export async function registerUser(request: Request, response: Response): Promis
         const hashedPassword = hashPassword(password);
         const user = await userModel.create({
             ...data,
-            password: hashedPassword,
-            fullName: {
-                firstName: fullName.firstName,
-                ...(fullName.lastName != undefined && { lastName: fullName.lastName })
-            }
+            password: hashedPassword
         })
         if (!user) {
             return response.status(401).json({
@@ -42,7 +37,7 @@ export async function registerUser(request: Request, response: Response): Promis
         }
 
         //wellcome email
-        const sendEmail = await sendRegistrationEmail(user.email, user.fullName?.firstName as string)
+        const sendEmail = await sendRegistrationEmail(user.email, user.userName)
 
         const token = createToken(user)
         createSession(response, 'user_Authentication_token', token) //set the token in cookies for session
@@ -134,7 +129,7 @@ export async function logoutUser(request: Request, response: Response) {
 export async function getUser(request: Request, response: Response) {
     try {
         const user = await userModel.findById(request.user?.id, {
-            password: 0, email: 0
+            password: 0
         });
 
         if (user == null || !user) {

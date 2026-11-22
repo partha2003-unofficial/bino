@@ -32,18 +32,19 @@ Response interceptor	       Runs after receiving a response
 import axios from "axios";
 
 export const api = axios.create({
-    baseURL: 'http://localhost:4000/api/v1',
-    withCredentials: true,
-    timeout: 5000
+   baseURL: 'http://localhost:4000/api/v1',
+   withCredentials: true,
+   timeout: 5000
 })
 
 api.interceptors.response.use(
-    response => response,
-    error => {
-        if (axios.isAxiosError(error)) {
-            error.message = error.response?.data?.message ?? 'could not reach the server.';
-        }
+   response => response,
+   error => {
+      if (axios.isAxiosError(error)) {
+         error.message = error.response?.data?.message ?? 'could not reach the server.';
+         // console.log(error)
+      }
 
-        return Promise.reject(error);
-    }
+      return Promise.reject(error);
+   }
 )
