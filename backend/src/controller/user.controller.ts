@@ -116,7 +116,8 @@ export async function logoutUser(request: Request, response: Response) {
         await user.save();
 
         return response.status(200).json({
-            message: 'user is logout successfully'
+            message: 'user is logout successfully',
+            user: user
         })
 
     } catch (error) {

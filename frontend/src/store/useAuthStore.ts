@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type User = {
+export type User = {
     id: string,
     userName: string,
     email: string
@@ -8,18 +8,10 @@ type User = {
 
 type AuthStore = {
     user: User | null,
-    checking: boolean,
-    sessionError: string,
     setUser: (user: User | null) => void;
-    setChecking: (checking: boolean) => void;
-    setSessionError: (message: string) => void;
 }
 
 export const useAuthStore = create<AuthStore>(set => ({
     user: null,
-    checking: true,
-    sessionError: '',
-    setUser: user => set({ user, sessionError: '' }), // setUser is function with paramiter user
-    setChecking: checking => set({ checking }),
-    setSessionError: message => set({ sessionError: message })
+    setUser: user => set({ user }), // setUser is function with paramiter user
 })) 

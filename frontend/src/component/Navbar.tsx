@@ -1,26 +1,10 @@
-import { api } from "@/lib/Api";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router";
+import { useLogout } from "@/hooks/useAuth.hook";
+import { useSession } from "@/hooks/useSession.hook";
+import { Link, NavLink } from "react-router";
 
 export default function Navbar() {
-    const { checking, user, setUser } = useAuthStore();
-    const [error, setError] = useState('');
-    const [loggingOut, setLoggingOut] = useState(false);
-    const navigate = useNavigate()
-
-    async function handleOnLogout() {
-        setLoggingOut(true);
-        try {
-            await api.post('/user/logout');
-            navigate('/', { replace: true });
-            setUser(null);
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'logout Failed')
-        } finally {
-            setLoggingOut(false)
-        }
-    }
+    const { user, isPending } = useSession()
+    const logout = useLogout()
 
     return (
         <header className="border-b border-zinc-800">
@@ -41,7 +25,7 @@ export default function Navbar() {
                 }>Stocks</NavLink>
 
                 <div className="ml-auto flex flex-wrap items-center gap-4">
-                    {checking ?
+                    {isPending ?
                         (
                             <span className="nav-link">Checking session…</span>
 
@@ -50,10 +34,10 @@ export default function Navbar() {
                                 <Link to={'/profile'} className="nav-link" >{user.userName}</Link>
                                 <button
                                     className=""
-                                    onClick={handleOnLogout}
-                                    disabled={loggingOut}
+                                    onClick={() => logout.mutate()}
+                                    disabled={logout.isPending}
                                 >
-                                    {loggingOut ? "Logging out ..." : 'Logout'}
+                                    {logout.isPending ? "Logging out ..." : 'Logout'}
                                 </button>
                             </>
                         ) : (
@@ -65,7 +49,7 @@ export default function Navbar() {
                     }
                 </div>
             </nav >
-            {error && <p role="alert" className="shell error pb-3">{error}</p>}
+            {logout.isError && <p role="alert" className="shell error pb-3">{logout.error.message}</p>}
         </header >
     );
 }

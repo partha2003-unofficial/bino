@@ -1,6 +1,6 @@
-import { api } from "@/lib/Api";
-import { useAuthStore } from "@/store/useAuthStore";
-import React, { useState } from "react";
+import { useSignin, useSignup } from "@/hooks/useAuth.hook";
+import { useSession } from "@/hooks/useSession.hook";
+import React from "react";
 import { Link, Navigate, useLocation } from "react-router";
 
 type AuthFormProps = {
@@ -9,10 +9,12 @@ type AuthFormProps = {
 
 export default function AuthForm({ mode }: AuthFormProps) {
     const isSignUp = mode === 'signup';
-    const { user, checking, setUser } = useAuthStore()
-    const [lodding, setLodding] = useState(false);
-    const [error, setError] = useState('')
+    const { isPending, user } = useSession()
+    const signup = useSignup();
+    const signin = useSignin();
     const location = useLocation()
+
+    const auth = isSignUp ? signup : signin;
 
     const destination = location.state?.from ?? "/profile";
     /* 
@@ -38,28 +40,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
         HTMLFormElement: It tells React's event type which HTML element is responsible for the event.The element generating the event is an HTML form.
         */
         event?.preventDefault();
-        setLodding(true);
-        setError('')
+        auth.mutate(new FormData(event.currentTarget))
 
-        const body = Object.fromEntries(new FormData(event?.currentTarget));
+        //const body = Object.fromEntries(new FormData(event?.currentTarget));
         //It collects all the values from an HTML form and converts them into a normal JavaScript object.
 
-        try {
-            const { data } = await api.post(isSignUp ? "/user/signup" : "/user/signin", body);
-            setUser(data.user)
-
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'Please try again');
-            /*
-              if the error is a instance of the Error(that is use to chack if the error is comming form the backend try catch block or not)
-              then the set the error.message in the seError otherwise "please try again"
-            */
-        } finally {
-            setLodding(false)
-        }
     }
 
-    if (checking) return <p className="text-zinc-400">Checking session...</p>
+    if (isPending) return <p className="text-zinc-400">Checking session...</p>
     if (user) return <Navigate to={destination} replace />
 
     return (
@@ -99,10 +87,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     />
                 </label>
 
-                {error && <p role="alert" className="error">{error}</p>}
+                {auth.error && <p role="alert" className="error">{auth.error.message}</p>}
 
-                <button type="submit" className="btn-primary" disabled={lodding}>
-                    {lodding ? 'Please wait...' : isSignUp ? "Create account" : "Log in"}
+                <button type="submit" className="btn-primary" disabled={auth.isPending}>
+                    {auth.isPending ? 'Please wait...' : isSignUp ? "Create account" : "Log in"}
                 </button>
             </form>
 

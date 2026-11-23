@@ -8,7 +8,7 @@ export async function authenticaitonUser(request: Request, response: Response, n
 
         if (!token) {
             return response.status(404).json({
-                message: "token is not founded !",
+                message: "please login !",
                 token: token
             })
         }
