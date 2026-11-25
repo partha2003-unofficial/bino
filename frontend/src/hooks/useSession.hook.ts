@@ -24,7 +24,7 @@ export function useSession() {
             setUser(currentUser);
             return currentUser;
         },
-        staleTime: Infinity,
+        staleTime: Infinity, //mean if the query is run , then does not need to run again
         retry: false
     })
 
